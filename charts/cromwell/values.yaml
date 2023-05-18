@@ -1,0 +1,98 @@
+## platformConfig contains information about the environment on which the Chart is being installed
+## These values are expected be updated during the platform installation stage
+platformConfig:
+  ## Container registry for all images involved in the chart
+  registryDomain: vecps.cargo.io
+  ## Container repository for platform components
+  registryRepository: broadinstitute
+  ## Platform-wide image pull policy
+  imagePullPolicy: Always
+  ## ImagePullSecret name for all images involved in the chart
+  imagePullSecret: ""
+
+labels: {}
+
+podLabels: {}
+
+podAnnotations: {}
+
+## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+nodeSelector: {}
+
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: []
+
+image:
+  name: cromwell
+  tag: 85
+replicaCount: 1
+priorityClassName: ""
+securityContext:
+  enabled: false
+  runAsUser: 65534 # nobody
+  runAsGroup: 65534 # nobody
+  fsGroup: 65534 # nobody
+hardAntiAffinity: false
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: 3
+  successThreshold: 1
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: 3
+  successThreshold: 1
+startupProbe:
+  enabled: true
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 10
+  successThreshold: 1
+resources:
+  limits: {}
+  requests:
+    cpu: 100m
+    memory: 512Mi
+config:
+  dir: /etc/cromwell
+  file: config
+service:
+  type: ClusterIP
+  httpPort: 8000
+  # clusterIP: None
+  # loadBalancerIP:
+  # loadBalancerSourceRanges:
+  # - 10.10.10.0/24
+  annotations: {}
+  labels: {}
+persistence:
+  enabled: true
+  internal: false
+  pvcName: bioos-storage-pvc
+  storageClass: "nfs-csi"
+  pvcSize: 50Gi
+  accessMode: ReadWriteMany
+log:
+  path: /cromwell-workflow-logs
+
+basePath: /nfs/bioos-storage
+
+executionPath: /cromwell-executions
+
+db:
+  local:
+    enabled: false
+    path: /cromwell-db
+  mysql:
+    enabled: true
+    host: "mysql"
+    port: 3306
+    name: "bioos"
+    username: "root"
+    password: "test"

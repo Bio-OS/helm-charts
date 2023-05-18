@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apiserver
+  labels:
+    {{- include "bioos.apiserver-lables" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "bioos.apiserver-selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "bioos.apiserver-selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "bioos.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          env:
+          - name: LANG
+            value: C.UTF_8
+          - name: MYSQL_HOST
+            value: mysql
+          - name: MYSQL_USERNAME
+            value: root
+          - name: MYSQL_PORT
+            value: "3306"
+          - name: MYSQL_DB
+            value: {{ .Values.mysql.database }}
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secret-mysql
+                key: password
+          args:
+          - --config
+          - /app/conf/apiserver-mysql.yaml
+          - --log-level
+          - debug
+          image: "{{ .Values.image.repository }}/{{ .Values.image.project }}/{{ .Values.image.apiserver_name }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.api_http_port }}
+              protocol: TCP
+            - name: grpc
+              containerPort: {{ .Values.service.api_grpc_port }}
+              protocol: TCP
+          volumeMounts:
+          - name: apiserver-storage
+            mountPath: {{ .Values.storage.mountPath }}
+          - name: apiconf
+            mountPath: /app/conf/
+          - name: secret-file
+            mountPath: /app/conf/certs/
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: apiserver-storage
+        persistentVolumeClaim:
+          claimName: {{ .Values.storage.pvc }}
+      - name: apiconf
+        configMap:
+          name: cm-apiserver
+          items:
+          - key: apiserver-mysql.yaml
+            path: apiserver-mysql.yaml
+          - key: model.conf
+            path: model.conf
+          - key: policy.csv
+            path: policy.csv
+      - name: secret-file
+        secret:
+          secretName: secret-cert
+          items:
+          - key: ca.crt
+            path: ca.crt
+          - key: ca.key
+            path: ca.key
+          - key: server.crt
+            path: server.crt
+          - key: server.key
+            path: server.key
+          - key: client.crt
+            path: client.crt
+          - key: client.key
+            path: client.key

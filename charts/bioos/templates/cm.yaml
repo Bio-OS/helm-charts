@@ -1,0 +1,129 @@
+apiVersion: v1
+data:
+  apiserver-mysql.yaml: |
+    server:
+      http:
+        port: 8888
+        tls: false
+      grpc:
+        port: 50051
+        tls: true
+      cert-file: conf/certs/server.crt
+      key-file: conf/certs/server.key
+      ca-file: conf/certs/ca.crt
+      womtool-file: womtool.jar
+
+    log:
+      level: debug
+      output-path: app.log
+      max-backups: 3
+
+    db:
+      mysql:
+        host: MYSQL_HOST
+        username: MYSQL_USERNAME
+        password: MYSQL_PASSWORD
+        port: MYSQL_PORT
+        database: MYSQL_DB
+        maxOpenConns: 100
+        maxIdleConns: 1
+        connMaxLifetime: 1h
+        connMaxIdletime: 30s
+
+    eventBus:
+      maxRetries: 10
+      syncPeriod: 15s
+      batchSize: 5
+      workers: 5
+      dequeueTimeout: 5m
+      runningTimeout: 8760h
+
+    storage:
+      fs:
+        rootPath: {{ .Values.storage.mountPath }}
+        kubeResource:
+          namespace: {{ .Release.Namespace }}
+          pvcName: {{ .Values.storage.pvc }}
+
+    auth:
+      authn:
+        basic:
+          ttl: 5
+          users:
+            - ID: 1
+              name: admin
+              password: admin
+              groups:
+                - admin
+                - users
+              extensions:
+                dept:
+                  - deptA
+                  - deptB
+                role:
+                  - roleA
+                  - roleB
+        jwt:
+          id: secret-id
+          secret: secret
+          algorithm: HS256
+      authz:
+        casbin:
+          model: conf/model.conf
+          policy: conf/policy.csv
+
+    wes:
+      endpoint: http://10.211.55.13:8000
+      basePath: /api/ga4gh/wes/v1
+      timeout: 10
+      Retry: 1
+
+    client:
+      serverAddr: localhost:50051
+      serverName: localhost
+      insecure: false
+      serverCertFile: conf/certs/server.crt
+      clientCertFile: conf/certs/client.crt
+      clientCertKeyFile: conf/certs/client.key
+      caFile: conf/certs/ca.crt
+      username: admin
+      password: admin
+      method: grpc
+      timeout: 10
+
+    notebook:
+      {{- with .Values.notebook.images }}
+      officialImages:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.notebook.resources }}
+      resourceOptions:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      staticJupyterhub:
+        endpoint: {{ .Values.jupyterhub.endpoint }}
+        adminToken: {{ .Values.jupyterhub.adminToken }}
+        kubernetes:
+          namespace: {{ .Release.Namespace }}
+  model.conf: |-
+    [request_definition]
+    r = sub, obj, act
+
+    [policy_definition]
+    p = sub, obj, act
+
+    [role_definition]
+    g = _, _
+
+    [policy_effect]
+    e = some(where (p.eft == allow))
+
+    [matchers]
+    m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act || r.sub == "admin"
+  policy.csv: |-
+    p, user1, proto.WorkspaceService, GetWorkspace
+    p, user1, Workspace, Create
+    p, user1, Workspace, List
+kind: ConfigMap
+metadata:
+  name: cm-apiserver

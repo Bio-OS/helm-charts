@@ -1,3 +1,4 @@
+# https://wangchujiang.com/reference/docs/github-actions.html
 name: Release Charts
 
 on:
@@ -31,6 +32,6 @@ jobs:
         with:
           charts_dir: charts
           config: cr.yaml
-          charts_repo_url: markthink.github.io/charts
+          charts_repo_url: markthink.github.io/helm-charts
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
