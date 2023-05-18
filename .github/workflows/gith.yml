@@ -34,9 +34,3 @@ jobs:
           charts_repo_url: markthink.github.io/charts
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3 # 开源 actions 用于部署
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN}} # GitHub 读写仓库的权限token，自动生成无需关心
-          publish_branch: gh-pages
