@@ -18,7 +18,7 @@ hub:
         - "--NotebookApp.allow_origin=*"
         - '--NotebookApp.tornado_settings={"headers":{"Content-Security-Policy": "frame-ancestors ''self'' http://localhost"}}'
   image:
-    name: vecps.cargo.io/jupyterhub/k8s-hub
+    name: jupyterhub/k8s-hub
     tag: "2.0.0.dev"
   networkPolicy:
     enabled: false
@@ -29,9 +29,9 @@ hub:
 singleuser:
   networkTools:
     image:
-      name: vecps.cargo.io/jupyterhub/k8s-network-tools
+      name: jupyterhub/k8s-network-tools
   image:
-    name: vecps.cargo.io/jupyterhub/k8s-singleuser-sample
+    name: jupyterhub/k8s-singleuser-sample
   storage:
     type: none
   cpu:

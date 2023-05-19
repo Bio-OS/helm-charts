@@ -2,7 +2,7 @@
 ## These values are expected be updated during the platform installation stage
 platformConfig:
   ## Container registry for all images involved in the chart
-  registryDomain: docker.io
+  registryDomain: vecps.cargo.io
   ## Container repository for platform components
   registryRepository: broadinstitute
   ## Platform-wide image pull policy
@@ -73,15 +73,15 @@ service:
   labels: {}
 persistence:
   enabled: true
-  internal: false
-  pvcName: bioos-storage-pvc
-  storageClass: "nfs-csi"
+  internal: true
+  pvcName: cromwell-pvc
+  storageClass: ""
   pvcSize: 50Gi
   accessMode: ReadWriteMany
 log:
   path: /cromwell-workflow-logs
 
-basePath: /nfs/bioos-storage
+basePath: /app/cromwell
 
 executionPath: /cromwell-executions
 
@@ -93,6 +93,6 @@ db:
     enabled: true
     host: "mysql"
     port: 3306
-    name: "bioos"
+    name: bioos
     username: "root"
     password: "test"

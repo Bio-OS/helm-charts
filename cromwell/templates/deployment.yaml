@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "common.names.cromwell" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "common.labels.cromwell" . | nindent 4 }}
+spec:
+  replicas: {{ default "1" .Values.replicaCount }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels.cromwell" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- with (include "common.podAnnotations.cromwell" .) }}
+        {{- . | indent 8 }}
+        {{- end }}
+      labels: {{- include "common.labels.cromwell" . | nindent 8 }}
+        {{- with (include "common.podLabels.cromwell" .) }}
+        {{- . | indent 8 }}
+        {{- end }}
+    spec:
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
+      {{- if .Values.securityContext.enabled }}
+      securityContext:
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+      {{- end }}
+      affinity:
+        podAntiAffinity:
+          {{- if .Values.hardAntiAffinity }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  {{- include "common.labels.matchLabels.cromwell" . | nindent 18 }}
+          {{- else }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    {{- include "common.labels.matchLabels.cromwell" . | nindent 20 }}
+          {{- end }}
+      volumes:
+        {{- if .Values.persistence.enabled }}
+        - name: {{ .Values.persistence.pvcName }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.pvcName }}
+        {{- end }}
+        - name: {{ template "common.names.cromwell" . }}
+          secret:
+            secretName: {{ template "common.names.cromwell" . }}
+            items:
+              - key: {{ .Values.config.file }}
+                path: {{ .Values.config.file }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector: {{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations: {{- toYaml .Values.tolerations | nindent 8 }}
+      {{- end }}
+      {{- with .Values.platformConfig.imagePullSecret }}
+      imagePullSecrets:
+        - name: {{ . }}
+      {{- end }}
+      containers:
+        - name: server
+          image: {{ template "common.images.cromwell" . }}
+          imagePullPolicy: {{ default "Always" .Values.platformConfig.imagePullPolicy | quote }}
+          env:
+            - name: "POD_NAME"
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: "POD_NAMESPACE"
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: JAVA_OPTS
+              value: "-Dconfig.file={{ .Values.config.dir }}/{{ .Values.config.file }}"
+          args:
+            - server
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.httpPort }}
+              protocol: TCP
+          volumeMounts:
+            - name: {{ template "common.names.cromwell" . }}
+              mountPath: {{ .Values.config.dir }}
+            {{- if .Values.persistence.enabled }}
+            - name: {{ .Values.persistence.pvcName }}
+              mountPath: {{ .Values.basePath }}
+            {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            httpGet:
+              path: /api/ga4gh/wes/v1/runs?page_size=1
+              port: http
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /api/ga4gh/wes/v1/runs?page_size=1
+              port: http
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe:
+            httpGet:
+              path: /api/ga4gh/wes/v1/runs?page_size=1
+              port: http
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.resources }}
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
