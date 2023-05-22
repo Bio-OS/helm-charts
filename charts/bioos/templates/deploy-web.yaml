@@ -41,8 +41,9 @@ spec:
               containerPort: {{ .Values.service.web_port }}
               protocol: TCP
           volumeMounts:
-          - name: nginxconf
+          - name: nginx-etc
             mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
           # livenessProbe:
           #   httpGet:
           #     path: /
@@ -66,9 +67,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-      - name: nginxconf
+      - name: nginx-etc
         configMap:
           name: cm-web
           items:
           - key: nginx.conf
             path: nginx.conf
+          defaultMode: 420
