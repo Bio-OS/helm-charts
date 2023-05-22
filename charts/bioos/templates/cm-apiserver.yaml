@@ -5,6 +5,7 @@ data:
       http:
         port: 8888
         tls: false
+        max-request-body-size: 67108864 #64M
       grpc:
         port: 50051
         tls: true
@@ -73,7 +74,7 @@ data:
           policy: conf/policy.csv
 
     wes:
-      endpoint: http://10.211.55.13:8000
+      endpoint: http://180.184.43.61:8000
       basePath: /api/ga4gh/wes/v1
       timeout: 10
       Retry: 1

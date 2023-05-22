@@ -40,6 +40,9 @@ spec:
             - name: web
               containerPort: {{ .Values.service.web_port }}
               protocol: TCP
+          volumeMounts:
+          - name: nginxconf
+            mountPath: /etc/nginx/nginx.conf
           # livenessProbe:
           #   httpGet:
           #     path: /
@@ -62,3 +65,10 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+      - name: nginxconf
+        configMap:
+          name: cm-web
+          items:
+          - key: nginx.conf
+            path: nginx.conf

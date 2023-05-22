@@ -20,6 +20,8 @@ metadata:
     {{- include "bioos.web-lables" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:
+    # https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#custom-max-body-size
+    nginx.ingress.kubernetes.io/proxy-body-size: "64m"
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
