@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: v1
-description: BioOS UI 前端
-name: bioos
-type: application
-version: 0.1.0

@@ -1,8 +1,8 @@
 image:
-  repository: vecps.cargo.io
+  repository: docker.io
   project: bioos
-  web_name: bioos_web:v1.3.3
-  apiserver_name: bioos_apiserver:v1.3.3
+  web_name: web:v1.0
+  apiserver_name: apiserver:v1.0
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -25,7 +25,6 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  mysql_port: 3306
   web_port: 80
   api_http_port: 8888
   api_grpc_port: 50051
@@ -73,10 +72,9 @@ jupyterhub:
 notebook:
   images:
     - name: datascience
-      version: '1.0'
-      description: 'this is official image'
-      image: vecps.cargo.io/jupyter/datascience-notebook:hub-3.0.0
-      updateTime: '2023-05-04T04:04:05Z'
+      version: "1.0"
+      description: "this is official image"
+      image: jupyter/datascience-notebook:hub-3.0.0
   resources:
     - cpu: 1
       memory: 1Gi
