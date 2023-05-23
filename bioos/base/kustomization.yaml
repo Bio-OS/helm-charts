@@ -13,7 +13,7 @@ patches:
       value: 192.168.46.300  
     - op: replace
       path: /parameters/share
-      value: /fox
+      value: /nfs
   target:
     kind: StorageClass
     name: nfs-csi
@@ -24,10 +24,13 @@ patches:
       value: 192.168.46.300    
     - op: replace
       path: /spec/csi/volumeAttributes/share
-      value: /fox
+      value: /nfs
     - op: replace
       path: /spec/csi/volumeHandle
-      value: 192.168.46.300#fox#bioos-storage# 
+      value: 192.168.46.300#nfs#bioos-storage# 
+    - op: replace
+      path: /spec/capacity/storage
+      value: 50Gi
   target:
     kind: PersistentVolume
     name: bioos-storage
