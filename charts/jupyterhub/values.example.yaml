@@ -18,8 +18,8 @@ hub:
         - "--NotebookApp.allow_origin=*"
         - '--NotebookApp.tornado_settings={"headers":{"Content-Security-Policy": "frame-ancestors ''self'' http://localhost"}}'
   image:
-    name: jupyterhub/k8s-hub
-    tag: "2.0.0.dev"
+    name: bioos/jupyterhub
+    tag: "v1.0"
   networkPolicy:
     enabled: false
   db:

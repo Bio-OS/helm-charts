@@ -1,8 +1,8 @@
 image:
   repository: docker.io
   project: bioos
-  web_name: web:v1.1
-  apiserver_name: apiserver:v1.1
+  web_name: web:v1.2
+  apiserver_name: apiserver:v1.2
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -69,8 +69,8 @@ storage:
   mountPath: /app/conf/fs
 
 jupyterhub:
-  endpoint: http://10.211.55.13/jupyterhub
-  adminToken: 3004278e5f8744a7b726ace1ab009cdf
+  endpoint: http://180.184.43.61/jupyterhub
+  adminToken: 6026738d798c495aa01c7831048539d9
 
 notebook:
   images:

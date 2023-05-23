@@ -22,12 +22,14 @@ To uninstall the chart:
     helm delete my-<chart-name>
 
 
-kubectl kustomize <kustomization_directory>
-kubectl apply -k <kustomization_directory>
+
 
 [helm 集成 kustomization](https://austindewey.com/2020/07/27/patch-any-helm-chart-template-using-a-kustomize-post-renderer/)
 
 
 ```bash
-helm install my-nginx $PATH_TO_CHART --post-renderer=./hook.sh
+helm install demo $PATH_TO_CHART --post-renderer=./hook.sh
 ```
+
+https://github.com/kubernetes-sigs/kustomize/issues/680
+https://github.com/kubernetes-sigs/kustomize/issues/3787
