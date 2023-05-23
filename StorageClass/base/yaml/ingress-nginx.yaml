@@ -439,7 +439,7 @@ spec:
                   fieldPath: metadata.namespace
             - name: LD_PRELOAD
               value: /usr/local/lib/libmimalloc.so
-          image: dyrnq/controller:v1.7.1
+          image: dyrnq/controller:v1.7.0
           imagePullPolicy: IfNotPresent
           lifecycle:
             preStop:
