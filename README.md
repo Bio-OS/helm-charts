@@ -21,4 +21,7 @@ To uninstall the chart:
 
     helm delete my-<chart-name>
 
-最新的 helm charts 在 /charts 目录
+
+NFS_SERVER=192.168.0.100
+NFS_PATH=/nfs
+cat sc.yaml | sed "s/server: 192.168.46.255/server: ${NFS_SERVER}/g"|sed "s#share: /nfs#share: ${NFS_PATH}#g" > /tmp/sc.yaml
