@@ -22,6 +22,12 @@ To uninstall the chart:
     helm delete my-<chart-name>
 
 
-NFS_SERVER=192.168.0.100
-NFS_PATH=/nfs
-cat sc.yaml | sed "s/server: 192.168.46.255/server: ${NFS_SERVER}/g"|sed "s#share: /nfs#share: ${NFS_PATH}#g" > /tmp/sc.yaml
+kubectl kustomize <kustomization_directory>
+kubectl apply -k <kustomization_directory>
+
+[helm 集成 kustomization](https://austindewey.com/2020/07/27/patch-any-helm-chart-template-using-a-kustomize-post-renderer/)
+
+
+```bash
+helm install my-nginx $PATH_TO_CHART --post-renderer=./hook.sh
+```
