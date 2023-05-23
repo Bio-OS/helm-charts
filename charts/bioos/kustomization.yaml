@@ -9,6 +9,14 @@ patches:
       - op: replace
         path: /apiserver-mysql.yaml/wes/endpoint
         value: http://180.184.43.200:8000
+  - patch: |-
+      - op: replace
+        path: /apiserver-mysql.yaml/notebook/staticJupyterhub/endpoint
+        value: http://10.211.55.13/jupyterhub
+  - patch: |-
+      - op: replace
+        path: /apiserver-mysql.yaml/notebook/staticJupyterhub/adminToken
+        value: 3004278e5f8744a7b726ace1ab009cdf
     target:
       kind: ConfigMap
       name: cm-apiserver
