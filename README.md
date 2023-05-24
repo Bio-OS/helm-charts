@@ -23,7 +23,6 @@ To uninstall the chart:
 
 
 
-
 [helm 集成 kustomization](https://austindewey.com/2020/07/27/patch-any-helm-chart-template-using-a-kustomize-post-renderer/)
 
 ```bash
