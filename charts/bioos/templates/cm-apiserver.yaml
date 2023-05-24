@@ -74,7 +74,7 @@ data:
           policy: conf/policy.csv
 
     wes:
-      endpoint: http://180.184.43.61:8000
+      endpoint: {{ .Values.wes.endpoint }}
       basePath: /api/ga4gh/wes/v1
       timeout: 10
       Retry: 1

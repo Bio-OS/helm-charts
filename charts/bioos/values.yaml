@@ -61,17 +61,6 @@ tolerations: []
 
 affinity: {}
 
-mysql:
-  database: bioos
-
-storage:
-  pvc: bioos-storage-pvc
-  mountPath: /app/conf/fs
-
-jupyterhub:
-  endpoint: http://180.184.43.61/jupyterhub
-  adminToken: 6026738d798c495aa01c7831048539d9
-
 notebook:
   images:
     - name: datascience
@@ -85,3 +74,20 @@ notebook:
     - cpu: 2
       memory: 4Gi
       disk: 20Gi
+
+mysql:
+  hostname: mysql
+  database: bioos
+  username: root
+  password: admin
+
+storage:
+  pvc: bioos-storage-pvc
+  mountPath: /app/conf/fs
+
+wes:
+  endpoint: http://180.184.43.61:8000
+
+jupyterhub:
+  endpoint: http://180.184.43.61/jupyterhub
+  adminToken: 6026738d798c495aa01c7831048539d9

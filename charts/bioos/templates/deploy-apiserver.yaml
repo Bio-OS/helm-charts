@@ -35,9 +35,9 @@ spec:
           - name: LANG
             value: C.UTF_8
           - name: MYSQL_HOST
-            value: mysql
+            value: {{ .Values.mysql.hostname }}
           - name: MYSQL_USERNAME
-            value: root
+            value: {{ .Values.mysql.password }}
           - name: MYSQL_PORT
             value: "3306"
           - name: MYSQL_DB
