@@ -10,7 +10,7 @@ patches:
 - patch: |-
     - op: replace
       path: /parameters/server
-      value: 10.211.55.16  
+      value: 192.168.46.255  
     - op: replace
       path: /parameters/share
       value: /nfs
@@ -21,13 +21,13 @@ patches:
 - patch: |-
     - op: replace
       path: /spec/csi/volumeAttributes/server
-      value: 10.211.55.16    
+      value: 192.168.46.255    
     - op: replace
       path: /spec/csi/volumeAttributes/share
       value: /nfs
     - op: replace
       path: /spec/csi/volumeHandle
-      value: 10.211.55.16#nfs#bioos-storage# 
+      value: 192.168.46.255#nfs#bioos-storage# 
     - op: replace
       path: /spec/capacity/storage
       value: 50Gi

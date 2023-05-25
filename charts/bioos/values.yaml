@@ -1,8 +1,8 @@
 image:
   repository: docker.io
   project: bioos
-  web_name: web:v1.2
-  apiserver_name: apiserver:v1.2
+  web_name: web:v1.5
+  apiserver_name: apiserver:v1.5
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -86,7 +86,7 @@ mysql:
   hostname: mysql
   database: bioos
   username: root
-  password: admin
+  password: test
 
 storage:
   pvc: bioos-storage-pvc
@@ -97,4 +97,4 @@ wes:
 
 jupyterhub:
   endpoint: http://180.184.43.61/jupyterhub
-  adminToken: 6026738d798c495aa01c7831048539d9
+  adminToken: c876b254956a433aaf02836605565af6

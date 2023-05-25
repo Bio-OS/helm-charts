@@ -37,7 +37,7 @@ spec:
           - name: MYSQL_HOST
             value: {{ .Values.mysql.hostname }}
           - name: MYSQL_USERNAME
-            value: {{ .Values.mysql.password }}
+            value: {{ .Values.mysql.username }}
           - name: MYSQL_PORT
             value: "3306"
           - name: MYSQL_DB
