@@ -13,9 +13,9 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: bioos-web
+  name: bioos-apiserver
   labels:
-    {{- include "bioos.web-lables" . | nindent 4 }}
+    {{- include "bioos.apiserver-lables" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -39,14 +39,12 @@ spec:
     - host: {{ .host | quote }}
       http:
         paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            pathType: {{ .pathType }}
+          - path: /apiserver
+            pathType: Prefix
             backend:
               service:
-                name: {{ .service_name }}
+                name: apiserver
                 port:
-                  number: {{ .service_port }}
-          {{- end }}
+                  number: 8888
     {{- end }}
 {{- end }}

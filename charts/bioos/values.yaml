@@ -46,10 +46,6 @@ ingress:
           pathType: ImplementationSpecific
           service_name: web
           service_port: 80
-        - path: /apiserver
-          pathType: Prefix
-          service_name: apiserver
-          service_port: 8888
 
   tls: []
 

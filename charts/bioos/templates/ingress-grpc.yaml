@@ -13,9 +13,9 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
+  name: bioos-apiserver-grpc
   labels:
-    {{- include "bioos.web-lables" . | nindent 4 }}
+    {{- include "bioos.apiserver-lables" . | nindent 4 }}
   annotations:
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
 spec:
