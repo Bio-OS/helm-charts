@@ -1,2 +1,6 @@
 .vscode
 .vagrant
+nacos-k8s
+mysql-schema.sql
+nacos.yaml
+nacos-sdk-go

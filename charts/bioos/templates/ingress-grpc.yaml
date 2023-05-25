@@ -16,10 +16,8 @@ metadata:
   name: {{ $fullName }}
   labels:
     {{- include "bioos.web-lables" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
 spec:
   {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.ingress.className }}
@@ -39,14 +37,12 @@ spec:
     - host: {{ .host | quote }}
       http:
         paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            pathType: {{ .pathType }}
+          - path: /apiserver-grpc
+            pathType: Prefix
             backend:
               service:
-                name: {{ .service_name }}
+                name: apiserver
                 port:
-                  number: {{ .service_port }}
-          {{- end }}
+                  number: 50051
     {{- end }}
 {{- end }}
