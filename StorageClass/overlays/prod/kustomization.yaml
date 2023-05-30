@@ -1,0 +1,44 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# namePrefix: prod-
+
+resources:
+- ../../base
+
+patches:
+- patch: |-
+    - op: replace
+      path: /parameters/server
+      value: 192.168.46.300  
+    - op: replace
+      path: /parameters/share
+      value: /nfs
+  target:
+    kind: StorageClass
+    name: nfs-csi
+    
+- patch: |-
+    - op: replace
+      path: /spec/csi/volumeAttributes/server
+      value: 192.168.46.300    
+    - op: replace
+      path: /spec/csi/volumeAttributes/share
+      value: /nfs
+    - op: replace
+      path: /spec/csi/volumeHandle
+      value: 192.168.46.300#nfs#bioos-storage# 
+    - op: replace
+      path: /spec/capacity/storage
+      value: 50Gi
+  target:
+    kind: PersistentVolume
+    name: bioos-storage
+
+- patch: |-
+    - op: replace
+      path: /spec/resources/requests/storage
+      value: 50Gi  
+  target:
+    kind: PersistentVolumeClaim
+    name: bioos-storage-pvc

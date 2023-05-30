@@ -1,0 +1,61 @@
+---
+# sc.yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-csi
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: 192.168.46.255
+  share: /nfs
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+mountOptions:
+  - hard
+  - nfsvers=4.1
+---
+# https://github.com/kubernetes-csi/csi-driver-nfs/blob/master/deploy/example/pv-nfs-csi.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    pv.kubernetes.io/provisioned-by: nfs.csi.k8s.io
+  name: bioos-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 10Gi
+  csi:
+    driver: nfs.csi.k8s.io
+    volumeAttributes:
+      mountPermissions: 0777
+      csi.storage.k8s.io/pv/name: bioos-storage
+      csi.storage.k8s.io/pvc/name: bioos-storage-pvc
+      server: 192.168.46.255
+      share: /nfs
+      subdir: bioos-storage
+    volumeHandle: 192.168.46.255#nfs#bioos-storage#
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: nfs-csi
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.beta.kubernetes.io/storage-provisioner: nfs.csi.k8s.io
+    volume.kubernetes.io/storage-provisioner: nfs.csi.k8s.io
+  name: bioos-storage-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: nfs-csi
+  volumeMode: Filesystem
+  volumeName: bioos-storage

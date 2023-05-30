@@ -1,0 +1,72 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-configmap
+data:
+  test_env: "foo"
+---
+apiVersion: v1
+data:
+  pass: bXlwYXNzd29yZA==
+kind: Secret
+metadata:
+  name: test-secret
+---
+apiVersion: v1
+data:
+  nginx.conf: |
+    # Run as a less privileged user for security reasons.
+    user nginx;
+kind: ConfigMap
+metadata:
+  name: cm-ask
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+  annotations:
+    configmap.reloader.stakater.com/reload: "test-configmap"
+    configmap.reloader.stakater.com/reload: "cm-ask"
+    secret.reloader.stakater.com/reload: "test-secret"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /tmp/nginx.conf
+              name: ask
+              subPath: nginx.conf
+          env:
+            - name: TEST_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: test-configmap
+                  key: test_env
+            - name: TEST_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: test-secret
+                  key: pass
+      volumes:
+        - name: ask
+          configMap:
+            name: cm-ask
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+            defaultMode: 0777
