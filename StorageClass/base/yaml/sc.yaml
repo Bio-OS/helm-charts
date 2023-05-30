@@ -23,12 +23,13 @@ metadata:
   name: bioos-storage
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   capacity:
     storage: 10Gi
   csi:
     driver: nfs.csi.k8s.io
     volumeAttributes:
+      mountPermissions: 0777
       csi.storage.k8s.io/pv/name: bioos-storage
       csi.storage.k8s.io/pvc/name: bioos-storage-pvc
       server: 192.168.46.255
@@ -36,8 +37,8 @@ spec:
       subdir: bioos-storage
     volumeHandle: 192.168.46.255#nfs#bioos-storage#
   mountOptions:
-  - hard
-  - nfsvers=4.1
+    - hard
+    - nfsvers=4.1
   persistentVolumeReclaimPolicy: Delete
   storageClassName: nfs-csi
   volumeMode: Filesystem
@@ -51,7 +52,7 @@ metadata:
   name: bioos-storage-pvc
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi

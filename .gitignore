@@ -4,3 +4,7 @@ nacos-k8s
 mysql-schema.sql
 nacos.yaml
 nacos-sdk-go
+csi_values.yaml
+nginx.yaml
+nacos-bot
+ask

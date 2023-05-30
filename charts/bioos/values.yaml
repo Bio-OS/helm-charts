@@ -1,8 +1,8 @@
 image:
   repository: docker.io
   project: bioos
-  web_name: web:v1.5
-  apiserver_name: apiserver:v1.5
+  web_name: web:v1.14
+  apiserver_name: apiserver:v1.12
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
