@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions: write-all
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.19
+          check-latest: true
+          cache: true
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Make changes to pull request
+        run: |
+          RELEASE_VERSION=${GITHUB_REF#refs/*/}
+          echo ${RELEASE_VERSION}
+          sed -i "s/web_name.*/web_name: web:${RELEASE_VERSION}/g" charts/bioos/values.yaml
+          sed -i "s/apiserver_name.*/apiserver_name: apiserver:${RELEASE_VERSION}/g" charts/bioos/values.yaml
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v4
+        with:
+          add-paths: |
+            *.yaml
+          token: ${{ secrets.REPOSITORYDISPATCH }}
+          commit-message: "feat: update bioos web and apiserver image tag to ${{ github.ref }}"
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          signoff: false
+          branch: feat/update-bioos-web-and-apiserver-image-tag-to-${{ github.ref }}
+          base: main
+          delete-branch: true
+          title: 'feat: update bioos web and apiserver image tag to ${{ github.ref }}'
+          body: |
+            update report
+            - update with *today's* date
+            - update bioos image web and apiserver tag to ${{ github.ref }}
+          labels: |
+            report
+            automated pr
+          draft: false
