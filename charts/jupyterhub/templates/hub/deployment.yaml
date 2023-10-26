@@ -88,10 +88,19 @@ spec:
       {{- with include "jupyterhub.imagePullSecrets" (dict "root" . "image" .Values.hub.image) }}
       imagePullSecrets: {{ . }}
       {{- end }}
-      {{- with .Values.hub.initContainers }}
+{{/*      {{- with .Values.hub.initContainers }}*/}}
       initContainers:
-        {{- . | toYaml | nindent 8 }}
-      {{- end }}
+        - name: "dbInit"
+          env:
+            - name: MYSQL_PASSWORD
+              value: {{ .Values.hub.db.password }}
+          image: bitnami/mysql:8.0.34-debian-11-r75
+          command:
+            - /bin/sh
+            - -c
+            - mysql -u root -h mysql.bioos.svc.cluster.local -p"${MYSQL_PASSWORD}" -e "CREATE DATABASE IF NOT EXISTS bioos;" || exit 1
+{{/*        {{- . | toYaml | nindent 8 }}*/}}
+{{/*      {{- end }}*/}}
       containers:
         {{- with .Values.hub.extraContainers }}
         {{- . | toYaml | nindent 8 }}
