@@ -78,6 +78,7 @@ hub:
       storageClassName:
 #    url: mysql+pymysql://${USERNAME}:${PASSWORD}@${MYSQL-ADDRESS}:${MYSQL-PORT}/bioos
     url: mysql+pymysql://root:Bytedance2023@mysql.bioos.svc.cluster.local:3306/bioos
+#    username: root
     password: Bytedance2023
   labels: {}
   annotations: {}
