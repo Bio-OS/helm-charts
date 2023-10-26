@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  bioos:
+  - apiVersion: v2
+    appVersion: v1
+    created: "2023-10-26T11:07:53.790554+08:00"
+    description: BioOS UI 前端
+    digest: 11b44895cb9c9efe3bd7693ef7de43c979b3841d684257b70aad78a106669a3f
+    name: bioos
+    type: application
+    urls:
+    - https://https:/bio-os.github.io/helm-charts/bioos-0.1.0.tgz
+    version: 0.1.0
+generated: "2023-10-26T11:07:53.7897+08:00"

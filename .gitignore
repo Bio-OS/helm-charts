@@ -1,5 +1,6 @@
 .vscode
 .vagrant
+.idea/
 nacos-k8s
 mysql-schema.sql
 nacos.yaml

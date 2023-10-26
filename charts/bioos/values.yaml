@@ -89,8 +89,10 @@ storage:
   mountPath: /app/conf/fs
 
 wes:
+#  cromwell service address
   endpoint: http://180.184.43.61:8000
 
 jupyterhub:
+#  jupyterhub service address
   endpoint: http://180.184.43.61/jupyterhub
   adminToken: c876b254956a433aaf02836605565af6
