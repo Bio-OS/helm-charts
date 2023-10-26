@@ -90,7 +90,7 @@ spec:
       {{- end }}
 {{/*      {{- with .Values.hub.initContainers }}*/}}
       initContainers:
-        - name: "dbInit"
+        - name: "bioos-db-init"
           env:
             - name: MYSQL_PASSWORD
               value: {{ .Values.hub.db.password }}
