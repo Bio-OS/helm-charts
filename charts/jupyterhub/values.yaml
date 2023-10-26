@@ -28,17 +28,28 @@ imagePullSecrets: []
 hub:
   revisionHistoryLimit:
   config:
+    NologinAuthenticatior:
+      username: nobody
     JupyterHub:
       admin_access: true
-      authenticator_class: dummy
+      authenticator_class: myauthenticator.NologinAuthenticator
+      tornado_settings:
+        slow_spawn_timeout: 0
+        headers:
+          Access-Control-Allow-Origin: "*"
+          Content-Security-Policy: "frame-ancestors 'self' http://localhost"
+    Spawner:
+      args:
+        - "--NotebookApp.allow_origin=*"
+        - '--NotebookApp.tornado_settings={"headers":{"Content-Security-Policy": "frame-ancestors ''self'' http://localhost"}}'
   service:
-    type: ClusterIP
+    type: NodePort
     annotations: {}
     ports:
       nodePort:
     extraPorts: []
     loadBalancerIP:
-  baseUrl: /
+  baseUrl: /jupyterhub/
   cookieSecret:
   initContainers: []
   nodeSelector: {}
@@ -55,7 +66,7 @@ hub:
     ##   deployment of JupyterHub on k8s is to be possible.
     type: Recreate
   db:
-    type: sqlite-pvc
+    type: mysql
     upgrade:
     pvc:
       annotations: {}
@@ -65,8 +76,9 @@ hub:
       storage: 1Gi
       subPath:
       storageClassName:
-    url:
-    password:
+#    url: mysql+pymysql://${USERNAME}:${PASSWORD}@${MYSQL-ADDRESS}:${MYSQL-PORT}/bioos
+    url: mysql+pymysql://root:Bytedance2023@mysql.bioos.svc.cluster.local:3306/bioos
+    password: Bytedance2023
   labels: {}
   annotations: {}
   command: []
@@ -78,8 +90,8 @@ hub:
   extraVolumes: []
   extraVolumeMounts: []
   image:
-    name: vecps.cargo.io/jupyterhub/k8s-hub
-    tag: "2.0.0.dev"
+    name: bioos/jupyterhub
+    tag: "v1.0"
     pullPolicy:
     pullSecrets: []
   resources: {}
@@ -97,7 +109,7 @@ hub:
     maxUnavailable:
     minAvailable: 1
   networkPolicy:
-    enabled: true
+    enabled: false
     ingress: []
     egress: []
     egressAllowRules:
@@ -107,7 +119,7 @@ hub:
       privateIPs: true
     interNamespaceAccessLabels: ignore
     allowedIngressPorts: []
-  allowNamedServers: false
+  allowNamedServers: true
   namedServerLimitPerUser:
   authenticatePrometheus:
   redirectToServer:
@@ -333,7 +345,7 @@ singleuser:
     preferred: []
   networkTools:
     image:
-      name: vecps.cargo.io/jupyterhub/k8s-network-tools
+      name: jupyterhub/k8s-network-tools
       tag: "2.0.0"
       pullPolicy:
       pullSecrets: []
@@ -368,7 +380,7 @@ singleuser:
   fsGid: 100
   serviceAccountName:
   storage:
-    type: dynamic
+    type: none
     extraLabels: {}
     extraVolumes: []
     extraVolumeMounts: []
@@ -383,16 +395,16 @@ singleuser:
       volumeNameTemplate: volume-{username}{servername}
       storageAccessModes: [ReadWriteOnce]
   image:
-    name: vecps.cargo.io/jupyterhub/k8s-singleuser-sample
+    name: jupyterhub/k8s-singleuser-sample
     tag: "2.0.0"
     pullPolicy:
     pullSecrets: []
   startTimeout: 300
   cpu:
-    limit:
-    guarantee:
+    limit: 1
+    guarantee: 1
   memory:
-    limit:
+    limit: 1G
     guarantee: 1G
   extraResource:
     limits: {}
@@ -405,7 +417,7 @@ singleuser:
 # scheduling relates to the user-scheduler pods and user-placeholder pods.
 scheduling:
   userScheduler:
-    enabled: true
+    enabled: false
     revisionHistoryLimit:
     replicas: 2
     logLevel: 4
@@ -529,7 +541,7 @@ scheduling:
     imagePullerPriority: -5
     userPlaceholderPriority: -10
   userPlaceholder:
-    enabled: true
+    enabled: false
     image:
       name: vecps.cargo.io/pause
       # tag is automatically bumped to new patch versions by the
@@ -587,7 +599,7 @@ prePuller:
   extraTolerations: []
   # hook relates to the hook-image-awaiter Job and hook-image-puller DaemonSet
   hook:
-    enabled: true
+    enabled: false
     pullOnlyOnChanges: true
     # image and the configuration below relates to the hook-image-awaiter Job
     image:
@@ -608,7 +620,7 @@ prePuller:
       name:
       annotations: {}
   continuous:
-    enabled: true
+    enabled: false
   pullProfileListImages: true
   extraImages: {}
   pause:
