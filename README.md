@@ -14,7 +14,7 @@
 - Helm: 3.12.0
 - MySQL: 8.0.34
 # 二、部署前K8S环境准备
-在开始Bio-OS部署前，请确保您已经在环境中获取了Bio-OS的开源helm charts(https://github.com/Bio-OS/helm-charts)，Bio-OS支持部署在ARM64及x86_64架构，另外Bio-OS的部署需要基于Kubernetes，您可以选择部署Kubernetes社区版或Minikube。本文档内容基于x86架构，如您使用环境为arm架构，请注意对应镜像和工具需选择arm版本安装。
+在开始Bio-OS部署前，请确保您已经在环境中获取了Bio-OS的开源[helm charts](https://github.com/Bio-OS/helm-charts)，Bio-OS支持部署在ARM64及x86_64架构，另外Bio-OS的部署需要基于Kubernetes，您可以选择部署Kubernetes社区版或Minikube。本文档内容基于x86架构，如您使用环境为arm架构，请注意对应镜像和工具需选择arm版本安装。
 ## 2.1 启动Minikube
 此处已假定您已安装Minikube，Minikube的安装可见：Minikube Start。这里以 minikube 为例进行本地环境的构建，生产环境建议选择 kubespray 进行高可用部署。
 ```bash
