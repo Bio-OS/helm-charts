@@ -20,16 +20,16 @@
 ```bash
 # root 用户执行
 minikube start \
---image-mirror-country=cn \
---image-repository=registry.cn-hangzhou.aliyuncs.com/google_containers \
---force \
---addons ingress \
---cni flannel \
---kubernetes-version 1.24.15 \
---nodes 4 \
---ports 80,443 \
---service-cluster-ip-range '10.255.0.0/16' \ #可自行修改,但不建议修改
---subnet '10.254.0.0/16' # 可执行修改,但不建议修改
+  --image-mirror-country=cn \
+  --image-repository=registry.cn-hangzhou.aliyuncs.com/google_containers \
+  --force \
+  --addons ingress \
+  --cni flannel \
+  --kubernetes-version 1.24.15 \
+  --nodes 4 \
+  --ports 80,443 \
+  --service-cluster-ip-range '10.255.0.0/16' \ #可自行修改,但不建议修改
+  --subnet '10.254.0.0/16' # 可执行修改,但不建议修改
 
 # 快捷键配置
 echo 'alias kubectl="minikube kubectl -- "' >> ~/.bashrc
@@ -55,31 +55,31 @@ tar xvf helm-v3.12.0-linux-amd64.tar.gz --strip-components=1 -C /usr/local/bin
 # 
 
 function installNFSServer() {
-apt update && apt install -y nfs-kernel-server nfs-common
+    apt update && apt install -y nfs-kernel-server nfs-common
 }
 
 # Config NFS Server
 function configNFS() {
-NFS_PATH=/nfs
-mkdir -p ${NFS_PATH}/bioos-storage && chmod -R 777 ${NFS_PATH}
-chown -R nobody:nogroup ${NFS_PATH}
-echo "${NFS_PATH} *(insecure,rw,sync,root_squash,no_subtree_check,all_squash)" >> /etc/exports
-systemctl restart nfs-server
-systemctl restart rpcbind
-exportfs -arv
-showmount -e localhost
+    NFS_PATH=/nfs
+    mkdir -p ${NFS_PATH}/bioos-storage && chmod -R 777 ${NFS_PATH}
+    chown -R nobody:nogroup ${NFS_PATH}
+    echo "${NFS_PATH} *(insecure,rw,sync,root_squash,no_subtree_check,all_squash)" >> /etc/exports
+    systemctl restart nfs-server
+    systemctl restart rpcbind
+    exportfs -arv
+    showmount -e localhost
 }
 
 # Set up auto-start on boot.
 function autoStart() {
-systemctl enable nfs-server
-systemctl enable rpcbind
+    systemctl enable nfs-server
+    systemctl enable rpcbind
 }
 
 function main() {
-installNFSServer
-configNFS
-autoStart
+    installNFSServer
+    configNFS
+    autoStart
 }
 
 main
@@ -90,14 +90,14 @@ main
 ```bash
 root@registry:/home/vagrant# systemctl status nfs-server
 ● nfs-server.service - NFS server and services
-Loaded: loaded (/lib/systemd/system/nfs-server.service; enabled; vendor preset: enabled)
-Drop-In: /run/systemd/generator/nfs-server.service.d
-└─order-with-mounts.conf
-Active: active (exited) since Thu 2023-05-18 21:33:05 CDT; 10s ago
-Process: 35987 ExecStartPre=/usr/sbin/exportfs -r (code=exited, status=0/SUCCESS)
-Process: 35988 ExecStart=/usr/sbin/rpc.nfsd (code=exited, status=0/SUCCESS)
-Main PID: 35988 (code=exited, status=0/SUCCESS)
-CPU: 6ms
+     Loaded: loaded (/lib/systemd/system/nfs-server.service; enabled; vendor preset: enabled)
+    Drop-In: /run/systemd/generator/nfs-server.service.d
+             └─order-with-mounts.conf
+     Active: active (exited) since Thu 2023-05-18 21:33:05 CDT; 10s ago
+    Process: 35987 ExecStartPre=/usr/sbin/exportfs -r (code=exited, status=0/SUCCESS)
+    Process: 35988 ExecStart=/usr/sbin/rpc.nfsd (code=exited, status=0/SUCCESS)
+   Main PID: 35988 (code=exited, status=0/SUCCESS)
+        CPU: 6ms
 
 May 18 21:33:05 registry systemd[1]: Starting NFS server and services...
 May 18 21:33:05 registry systemd[1]: Finished NFS server and services...
@@ -114,34 +114,35 @@ kubectl -n kube-system create secret generic mount-options --from-literal mountO
 
 # install nfs-csi helm chart
 helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs \
---namespace kube-system \
---version v4.4.0 \
---set image.nfs.repository=dyrnq/nfsplugin \
---set image.csiProvisioner.repository=dyrnq/csi-provisioner \
---set image.csiSnapshotter.repository=dyrnq/csi-snapshotter \
---set image.livenessProbe.repository=dyrnq/livenessprobe \
---set image.nodeDriverRegistrar.repository=dyrnq/csi-node-driver-registrar \
---set image.externalSnapshotter.repository=dyrnq/snapshot-controller
+    --namespace kube-system \
+    --version v4.4.0 \
+    --set image.nfs.repository=dyrnq/nfsplugin \
+    --set image.csiProvisioner.repository=dyrnq/csi-provisioner \
+    --set image.csiSnapshotter.repository=dyrnq/csi-snapshotter \
+    --set image.livenessProbe.repository=dyrnq/livenessprobe \
+    --set image.nodeDriverRegistrar.repository=dyrnq/csi-node-driver-registrar \
+    --set image.externalSnapshotter.repository=dyrnq/snapshot-controller
 ```
 安装 storageClass，nfs-csi 默认不提供 sc 资源，需要我们手动安装 sc(参考文档：https://github.com/kubernetes-csi/csi-driver-nfs/blob/master/deploy/example/storageclass-nfs.yaml)
 将以下命令复制并在shell中执行。
 ```bash
 cat << EOF | kubectl apply -f -
+cat << EOF | kubectl apply -f -
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-name: nfs-csi
+  name: nfs-csi
 provisioner: nfs.csi.k8s.io
 parameters:
-server: ${NFS-SERVER-IPADDRESS}   # 这里填 NFS Server 地址
-share: /nfs
-csi.storage.k8s.io/provisioner-secret-name: "mount-options"
-csi.storage.k8s.io/provisioner-secret-namespace: "kube-system"
+  server: ${NFS-SERVER-IPADDRESS}   # 这里填 NFS Server 地址
+  share: /nfs
+  csi.storage.k8s.io/provisioner-secret-name: "mount-options"
+  csi.storage.k8s.io/provisioner-secret-namespace: "kube-system"
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
 mountOptions:
-- nfsvers=4.1
-- hard
+  - nfsvers=4.1
+  - hard
 
 EOF
 ```
@@ -150,37 +151,39 @@ EOF
 复制以下命令并在shell中执行。
 ```bash
 cat << EOF | kubectl apply -f -
+cat << EOF | kubectl apply -f -
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-name: test-pvc
+  name: test-pvc
 spec:
-storageClassName: nfs-csi
-accessModes:
-- ReadWriteOnce
-resources:
-requests:
-storage: 1Gi
+  storageClassName: nfs-csi
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
 ---
 apiVersion: v1
 kind: Pod
 metadata:
-name: test-pvc-pod
+  name: test-pvc-pod
 spec:
-volumes:
-- name: task-pv-storage
-persistentVolumeClaim:
-claimName: test-pvc
-containers:
-- name: nginx
-image: nginx
-ports:
-- containerPort: 80
-name: "http-server"
-volumeMounts:
-- mountPath: "/usr/share/nginx/html"
-name: task-pv-storage
+  volumes:
+    - name: task-pv-storage
+      persistentVolumeClaim:
+        claimName: test-pvc
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+        - containerPort: 80
+          name: "http-server"
+      volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: task-pv-storage
 EOF
+
 ```
 
 查看pod状态
@@ -202,11 +205,11 @@ Bio-OS 的部署依赖 mysql 数据库、jupyterhub以及cromwell，安装 bioos
 helm repo add bitnami https://charts.bitnami.com/bitnami
 
 helm install mysql bitnami/mysql \
---create-namespace \
---namespace bioos \
---version 9.12.5 \
---set auth.rootPassword=Bytedance2023 \
---set primary.persistence.storageClass=nfs-csi
+    --create-namespace \
+    --namespace bioos \
+    --version 9.12.5 \
+    --set auth.rootPassword=Bytedance2023 \
+    --set primary.persistence.storageClass=nfs-csi
 ```
 命令中的rootPassword可改成自己需要的密码，但是后续步骤中都要做对应的修改。
 ## 3.2 安装 Jupyterhub
@@ -216,10 +219,10 @@ Bioos 使用 helm 打包，目前分为四个子包，需要注意的是 Jupyter
 helm repo add bioos https://bio-os.github.io/helm-charts/charts
 
 helm install jupyterhub bioos/jupyterhub \
---namespace bioos \
---create-namespace \
---set hub.db.url=mysql+pymysql://root:Bytedance2023@mysql.bioos.svc.cluster.local:3306/bioos \
---set hub.db.password=Bytedance2023
+    --namespace bioos \
+    --create-namespace \
+    --set hub.db.url=mysql+pymysql://root:Bytedance2023@mysql.bioos.svc.cluster.local:3306/bioos \
+    --set hub.db.password=Bytedance2023
 
 # 将 jupyterhub 服务暴露出来，使浏览器可以直接访问.拿到 token 之后，就可以关掉这个端口转发。
 kubectl -n bioos port-forward --address 0.0.0.0 service/hub 8081:8081
@@ -232,12 +235,12 @@ kubectl -n bioos port-forward --address 0.0.0.0 service/hub 8081:8081
 helm repo add https://bio-os.github.io/helm-charts/charts
 
 helm install cromwell bioos/cromwell \
---create-namespace \
---namespace bioos \
---set persistence.internal=true \
---set db.mysql.host=mysql.bioos.svc.cluster.local \
---set db.mysql.username=root \
---set db.mysql.password=Bytedance2023
+    --create-namespace \
+    --namespace bioos \
+    --set persistence.internal=true \
+    --set db.mysql.host=mysql.bioos.svc.cluster.local \
+    --set db.mysql.username=root \
+    --set db.mysql.password=Bytedance2023
 ```
 
 ## 3.4 安装 Bioos 服务
@@ -245,15 +248,15 @@ helm install cromwell bioos/cromwell \
 helm repo add https://bio-os.github.io/helm-charts/chartss
 
 helm install bioos bioos/bioos \
---create-namespace \
---namespace bioos \
---set mysql.hostname=mysql.bioos.svc.cluster.local \
---set mysql.database=bioos \
---set mysql.username=root \
---set mysql.password=Bytedance2023 \
---set wes.endpoint=http://cromwell.bioos.svc.cluster.local:8000 \ #配置cromwell在K8S中的访问地址
---set jupyterhub.endpoint=http://{{INGRESS-ADDRESS:PORT}}/jupyterhub/ \
---set jupyterhub.adminToken=${jupyterhub-token}  # 这里填写2.2步骤中获取的token
+    --create-namespace \
+    --namespace bioos \
+    --set mysql.hostname=mysql.bioos.svc.cluster.local \
+    --set mysql.database=bioos \
+    --set mysql.username=root \
+    --set mysql.password=Bytedance2023 \
+    --set wes.endpoint=http://cromwell.bioos.svc.cluster.local:8000 \ #配置cromwell在K8S中的访问地址
+    --set jupyterhub.endpoint=http://{{INGRESS-ADDRESS:PORT}}/jupyterhub/ \
+    --set jupyterhub.adminToken=${jupyterhub-token}  # 这里填写2.2步骤中获取的token
 
 # 端口转发：
 kubectl -n ingress-nginx port-forward --address 0.0.0.0 service/ingress-nginx-controller 8888:80
@@ -268,6 +271,4 @@ kubectl get pod,pv,pvc,ingress
 ![pod status](./img/pod-status.png)
 打开浏览器访问 http://{ServerIP}/workspace，至此完成 bioos 安装.
 ![Server](./img/finish.png)
-
-
 
