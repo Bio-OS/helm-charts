@@ -7,6 +7,7 @@ from binascii import a2b_hex
 from jupyterhub.utils import url_path_join
 from kubernetes_asyncio import client
 from tornado.httpclient import AsyncHTTPClient
+import kubespawner
 
 # Make sure that modules placed in the same directory as the jupyterhub config are added to the pythonpath
 configuration_directory = os.path.dirname(os.path.realpath(__file__))
@@ -36,7 +37,7 @@ def camelCaseify(s):
 # at the rate required.
 AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")
 
-c.JupyterHub.spawner_class = "myspawner.KubeSpawner"
+c.JupyterHub.spawner_class = kubespawner.KubeSpawner
 
 # Connect to a proxy running in a different pod. Note that *_SERVICE_*
 # environment variables are set by Kubernetes for Services
