@@ -228,8 +228,6 @@ helm install jupyterhub bioos/jupyterhub \
 kubectl -n bioos port-forward --address 0.0.0.0 service/hub 8081:8081
 ```
 
-打开浏览器访问：http://Server-IP/jupyterhub, 申请新 token.
-![jupyterhub token](./img/jupyterhub.png)
 ## 3.3 安装 Cromwell
 ```bash
 helm repo add https://bio-os.github.io/helm-charts/charts
