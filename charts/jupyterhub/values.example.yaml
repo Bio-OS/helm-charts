@@ -13,6 +13,14 @@ hub:
         headers:
           Access-Control-Allow-Origin: "*"
           Content-Security-Policy: "frame-ancestors 'self' http://localhost"
+      service_tokens:
+        # The token MUST be same with apiserver jupyterhub.adminToken
+        mybioostoken: bioos
+      load_roles:
+      - name: bioos
+        description: 'bioos apiserver access'
+        scopes: ['admin:users', 'admin:servers']
+        services: ['bioos']
     Spawner:
       args:
         - "--NotebookApp.allow_origin=*"
