@@ -228,7 +228,7 @@ helm install jupyterhub bioos/jupyterhub \
 kubectl -n bioos port-forward --address 0.0.0.0 service/hub 8081:8081
 ```
 
-打开浏览器访问：http://Server-IP/jupyterhub, 申请新 token.
+打开浏览器访问：http://Server-IP:8081/jupyterhub, 申请新 token.
 ![jupyterhub token](./img/jupyterhub.png)
 ## 3.3 安装 Cromwell
 ```bash
@@ -269,6 +269,6 @@ kubectl get pod,pv,pvc,ingress
 ```
 命令状态应该如下所示：
 ![pod status](./img/pod-status.png)
-打开浏览器访问 http://{ServerIP}/workspace，至此完成 bioos 安装.
+打开浏览器访问 http://{ServerIP}:8888/workspace，至此完成 bioos 安装.
 ![Server](./img/finish.png)
 
