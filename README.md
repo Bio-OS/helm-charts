@@ -18,8 +18,7 @@
 ## 2.1 启动Minikube
 此处已假定您已安装Minikube，Minikube的安装可见：Minikube Start。这里以 minikube 为例进行本地环境的构建，生产环境建议选择 kubespray 进行高可用部署。
 ```bash
-# root 用户执行
-minikube start \
+sudo minikube start \
   --image-mirror-country=cn \
   --image-repository=registry.cn-hangzhou.aliyuncs.com/google_containers \
   --force \
@@ -28,8 +27,8 @@ minikube start \
   --kubernetes-version 1.24.15 \
   --nodes 4 \
   --ports 80,443 \
-  --service-cluster-ip-range '10.255.0.0/16' \ #可自行修改,但不建议修改
-  --subnet '10.254.0.0/16' # 可执行修改,但不建议修改
+  --service-cluster-ip-range '10.255.0.0/16' \ # 可自行修改,但不建议修改
+  --subnet '10.254.0.0/16' # 可自行修改,但不建议修改
 
 # 快捷键配置
 echo 'alias kubectl="minikube kubectl -- "' >> ~/.bashrc
@@ -40,11 +39,11 @@ source ~/.bashrc
 安装helm部署包（注意：helm 版本必须大于 2.0 版本，如已有helm则可跳过这步）。如果在arm架构下，需将helm地址修改为：https://get.helm.sh/helm-v3.12.0-linux-arm64.tar.gz
 ```bash
 wget https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz
-tar xvf helm-v3.12.0-linux-amd64.tar.gz --strip-components=1 -C /usr/local/bin
+sudo tar xvf helm-v3.12.0-linux-amd64.tar.gz --strip-components=1 -C /usr/local/bin
 ```
 
 ## 2.3 NFS-Server 部署参考：
-这里以 Ubuntu 为例部署 NFS 服务，变量 NFS_PATH 对应 NFS 存储目录。**(root 用户执行)**
+这里以 Ubuntu 为例部署 NFS 服务，变量 NFS_PATH 对应 NFS 存储目录。将以下文本保存到install-nfs.sh：
 ```bash
 #!/bin/bash
 #
@@ -63,7 +62,10 @@ function configNFS() {
     NFS_PATH=/nfs
     mkdir -p ${NFS_PATH}/bioos-storage && chmod -R 777 ${NFS_PATH}
     chown -R nobody:nogroup ${NFS_PATH}
-    echo "${NFS_PATH} *(insecure,rw,sync,root_squash,no_subtree_check,all_squash)" >> /etc/exports
+    PATH_CONF="${NFS_PATH} *(insecure,rw,sync,root_squash,no_subtree_check,all_squash)"
+    if ! grep -qF -- "$PATH_CONF" /etc/exports; then
+        echo "$PATH_CONF" >> /etc/exports
+    fi
     systemctl restart nfs-server
     systemctl restart rpcbind
     exportfs -arv
@@ -84,6 +86,12 @@ function main() {
 
 main
 
+```
+
+运行安装脚本：
+```bash
+chmod +x install-nfs.sh
+sudo ./install-nfs.sh
 ```
 
 安装后检查：
@@ -197,6 +205,12 @@ NAME       STATUS   VOLUME                                     CAPACITY   ACCESS
 test-pvc   Bound    pvc-8dd031d1-2316-44b0-bd46-bdaeea7f9fd5   1Gi        RWO            nfs-csi        8d
 ```
 
+完成后删除测试的pod和pvc：
+```bash
+kubectl delete pod test-pvc-pod
+kubectl delete pvc test-pvc
+```
+
 # 三、Bioos 部署
 Bio-OS 的部署依赖 mysql 数据库、jupyterhub以及cromwell，安装 bioos 服务前需先安装mysql、jupyterhub和cromwell。
 **安装顺序：MySQL -> Jupyterhub -> Cromwell -> Bioos（必须遵从）**
@@ -232,8 +246,6 @@ kubectl -n bioos port-forward --address 0.0.0.0 service/hub 8081:8081
 ![jupyterhub token](./img/jupyterhub.png)
 ## 3.3 安装 Cromwell
 ```bash
-helm repo add https://bio-os.github.io/helm-charts/charts
-
 helm install cromwell bioos/cromwell \
     --create-namespace \
     --namespace bioos \
@@ -245,8 +257,6 @@ helm install cromwell bioos/cromwell \
 
 ## 3.4 安装 Bioos 服务
 ```bash
-helm repo add https://bio-os.github.io/helm-charts/chartss
-
 helm install bioos bioos/bioos \
     --create-namespace \
     --namespace bioos \
@@ -254,8 +264,8 @@ helm install bioos bioos/bioos \
     --set mysql.database=bioos \
     --set mysql.username=root \
     --set mysql.password=Bytedance2023 \
-    --set wes.endpoint=http://cromwell.bioos.svc.cluster.local:8000 \ #配置cromwell在K8S中的访问地址
-    --set jupyterhub.endpoint=http://{{INGRESS-ADDRESS:PORT}}/jupyterhub/ \
+    --set wes.endpoint=http://cromwell.bioos.svc.cluster.local:8000 \ # 配置cromwell在K8S中的访问地址
+    --set jupyterhub.endpoint=http://{{INGRESS-ADDRESS:PORT}}/jupyterhub/ \ # 填写ingress ip和port
     --set jupyterhub.adminToken=${jupyterhub-token}  # 这里填写2.2步骤中获取的token
 
 # 端口转发：
@@ -263,9 +273,9 @@ kubectl -n ingress-nginx port-forward --address 0.0.0.0 service/ingress-nginx-co
 ```
 
 # 四、环境验收
-执行命令 `kubectl get po ,pv,pvc,ing` 查看应用部署状态，bioos 使用了两块存储，一块用于 Mysql,一块用于 bioos 存储，并提供了若干 ingress 规则，方便子路径引用服务。
+执行命令 `kubectl get po,pv,pvc,ing` 查看应用部署状态，bioos 使用了两块存储，一块用于 mysql，一块用于 bioos 存储，并提供了若干 ingress 规则，方便子路径引用服务。
 ```bash
-kubectl get pod,pv,pvc,ingress
+kubectl get pod,pv,pvc,ingress -n bioos
 ```
 命令状态应该如下所示：
 ![pod status](./img/pod-status.png)
