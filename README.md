@@ -230,6 +230,36 @@ kubectl -n bioos port-forward --address 0.0.0.0 service/hub 8081:8081
 
 打开浏览器访问：http://Server-IP/jupyterhub, 申请新 token.
 ![jupyterhub token](./img/jupyterhub.png)
+
+如果无法启动jupyterhub，显示：
+```bash
+error: unable to forward port because pod is not running. Current status=Pending
+```
+尝试检验：
+```bash
+kubectl -n ingress-nginx get pods,svc -o wide
+```
+如果输出中的ingress-nginx pods的`READY`为`0/1`，且ingress-nginx-admission-create和ingress-nginx-admission-patch pod的`STATUS`为`ImagePullBackOff`，表明镜像拉取存在问题。检查对应pod：
+```bash
+kubectl describe pod <image> -n ingress-nginx
+```
+在`Events`中的`Message`如果显示`Back-off pulling image "<image>"`，则为镜像拉取失败。复制&lt;image&gt;的值，去掉`@sha256:...`的部分，尝试手动拉取该镜像（image-short为去掉sha256的image名）：
+```bash
+docker pull <image-short>
+```
+如果可以拉取，则更新镜像名：
+```bash
+kubectl set image pod/ingress-nginx-admission-create-... create=<image-short-create> -n ingress-nginx
+kubectl set image pod/ingress-nginx-admission-patch-... patch=<image-short-patch> -n ingress-nginx
+kubectl set image deployment/ingress-nginx-controller controller=<image-short-controller> -n ingress-nginx
+```
+显示对应`image updated`则成功。等待一会后检测：
+```bash
+ kubectl get pods -n ingress-nginx
+```
+如果admission的pods状态为`Completed`，controller的pod状态为`Running`，则修复完成。回到暴露端口的步骤并获取token。
+
+
 ## 3.3 安装 Cromwell
 ```bash
 helm repo add https://bio-os.github.io/helm-charts/charts
