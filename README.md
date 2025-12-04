@@ -228,8 +228,6 @@ helm install jupyterhub bioos/jupyterhub \
 kubectl -n bioos port-forward --address 0.0.0.0 service/hub 8081:8081
 ```
 
-打开浏览器访问：http://Server-IP/jupyterhub, 申请新 token.
-![jupyterhub token](./img/jupyterhub.png)
 ## 3.3 安装 Cromwell
 ```bash
 helm repo add https://bio-os.github.io/helm-charts/charts
@@ -255,8 +253,7 @@ helm install bioos bioos/bioos \
     --set mysql.username=root \
     --set mysql.password=Bytedance2023 \
     --set wes.endpoint=http://cromwell.bioos.svc.cluster.local:8000 \ #配置cromwell在K8S中的访问地址
-    --set jupyterhub.endpoint=http://{{INGRESS-ADDRESS:PORT}}/jupyterhub/ \
-    --set jupyterhub.adminToken=${jupyterhub-token}  # 这里填写2.2步骤中获取的token
+    --set jupyterhub.endpoint=http://{{INGRESS-ADDRESS:PORT}}/jupyterhub
 
 # 端口转发：
 kubectl -n ingress-nginx port-forward --address 0.0.0.0 service/ingress-nginx-controller 8888:80
